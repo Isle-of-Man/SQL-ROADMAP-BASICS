@@ -1,0 +1,455 @@
+DATABASE:
+CREATE DATABASE database_name;
+
+
+Creates a new database.
+USE database_name;
+Uses the specified database
+
+DDL COMMANDS:
+CREATE TABLE table_name (
+column1 datatype,
+column2 datatype,
+column3 datatype);
+The create table statement creates a new table in a database.
+ALTER TABLE table_name ADD column_name datatype;
+The Alter table statement is used to modify the columns of an
+existing table and add a new column.
+ALTER TABLE table_name DROP COLUMN column_name ;
+The Alter table statement is used to modify the columns of an
+existing table and Drop column.
+ALTER TABLE table_name RENAME TO table_newname ;
+Changes the table name for the existing table.
+ALTER TABLE table_name RENAME col_name TO col_newname;
+Renames the column names in the existing table.
+Drop table table_name;
+Drop deletes both structure and records in the table.
+Truncate table table_name;
+Truncate deletes the table but not the structure.
+
+
+*******************************************
+Schema : Farmer's Market 
+*************************************************
+tables :
+----------------------------------------------
+Booth : 
+booth_number	int	NO	PRI		
+booth_price_level	varchar(45)	NO			
+booth_description	varchar(255)	NO			
+booth_type	varchar(45)	NO			
+---------------------------------
+Customer : 
+customer_id	int	NO	PRI		
+customer_first_name	varchar(45)	YES			
+customer_last_name	varchar(45)	YES			
+customer_zip	varchar(45)	YES			
+------------------------------------------
+customer_purchases :
+product_id	int	NO	PRI	
+vendor_id	int	NO	PRI	
+market_date	date	NO	PRI	
+customer_id	int	NO	PRI	
+quantity	decimal(16,2)	YES		
+cost_to_customer_per_qty	decimal(16,2)	YES		
+transaction_time	time	NO	PRI	
+-----------------------------------------
+market_date_info :
+market_date	date	NO	PRI		
+market_day	varchar(45)	YES			
+market_week	varchar(45)	YES			
+market_year	varchar(45)	YES			
+market_start_time	varchar(45)	YES			
+market_end_time	varchar(45)	YES			
+special_notes	blob	YES			
+market_season	varchar(45)	YES			
+market_min_temp	varchar(200)	YES			
+market_max_temp	varchar(45)	YES			
+market_rain_flag	int	YES			
+market_snow_flag	int	YES			
+---------------------------------------------
+product : 
+product_id	int	NO	PRI	
+product_name	varchar(45)	YES		
+product_size	varchar(45)	YES		
+product_category_id	int	NO	PRI	
+product_qty_type	varchar(45)	YES		
+--------------------------------------------------
+product_category :
+product_category_id	int	NO	PRI		auto_increment
+product_category_name	varchar(45)	YES			
+--------------------------------------------------
+vendor :
+vendor_id	int	NO	PRI		auto_increment
+vendor_name	varchar(45)	NO	UNI		
+vendor_type	varchar(45)	NO			
+vendor_owner_first_name	varchar(45)	NO			
+vendor_owner_last_name	varchar(45)	NO			
+--------------------------------------------------
+vendor_booth_assignments :
+vendor_id	int	NO	PRI	
+booth_number	int	NO	PRI	
+market_date	date	NO	PRI	
+--------------------------------------------------
+vendor_inventory : 
+market_date	date	NO	PRI		
+quantity	decimal(16,2)	YES			
+vendor_id	int	NO	PRI		
+product_id	int	NO	PRI		
+original_price	decimal(16,2)	YES			
+--------------------------------------------------
+
+-------------------------------------------------------
+*------------------------------------------------------*
+**********************************************************
+
+**********************************************************
+Q:  GET ALL THE PRODUCTS AVAILABLE IN THE MARKET : 
+-- SELECT column_name 
+   FROM table_name
+   
+select * from product;
+
+# if we want to see only first 5 records 
+
+select 
+  product_id,
+  product_name
+from 
+  product
+limit 5 ;
+  
+
+ if we want to see only 5 records starting from 2nd :
+
+select 
+  product_id,
+  product_name
+from 
+  product
+limit 5 offset 2;
+  
+  
+**********************************************************
+
+
+SELECT column_names
+FROM table_name
+WHERE condition_to_filter
+ORDER BY column_name
+LIMIT number
+
+****************************************************
+
+
+
+Q : EXPLORE VENDOR_BOOTH_ASSIGNMENTS:
+LIST DOWN 10 ROWS OF FARMERS MARKET VENDOR BOOTH ASSIGHMENTS , DISPLAYING THE MAKRET_DATE,
+VENDOR_ID, AND BOOTH NUMBER FROM VENDOR BOOTH ASSIGHMENT TABLE . 
+
+select 
+   market_date,
+   vendor_id,
+   booth_number
+from 
+   vendor_booth_assignments
+limit 10;
+
+*******************************************************************************
+do not prefer to use select * from table to glance into table , 
+that increase processing load on pipeline unnecessarily,
+and increase company cost. 
+
+******************************************************************************
+
+# SORT data by market_date: 
+ORDER BY : 
+
+
+select 
+   market_date,
+   vendor_id,
+   booth_number
+from 
+   vendor_booth_assignments
+order by 
+   market_date asc 
+   
+         -- or desc if sorting in descending
+;
+
+
+--------------------------------------------------------------------------------
+select 
+      product_id,
+      product_name
+from 
+      product
+order by 
+      product_name;
+ -- non numerical data will be sorted alphabatically
+--------------------------------------------------------------------------------
+
+select 
+   product_id,
+   product_name,
+   product_category_id
+from 
+   product
+order by 
+   product_category_id,
+   product_name;     
+   
+   -- this query first sort by product category 
+   -- and then product_name wll be sorted alphabatically .
+   
+--------------------------------------------------------------------------------
+select 
+   product_id,   product_name,   product_category_id
+from 
+   product
+order by 
+   product_category_id DESC,    -- PRODUCT_CATEGORY  Will be sorted  descending order
+   product_name ASC;            -- in category,  product names will be in ascending order
+-------------------------------------------------------------------------------- 
+  
+********************************************************************************************
+Q : IN THE CUSTOMER_PURCHASES TABLE WE HVE ALL THE TRANSACTIONS : 
+QUANTITY AND COST : 
+GET THE TOTAL AMOUNT : 
+
+
+select 
+	market_date,
+	customer_id,
+	quantity,
+	cost_to_customer_per_qty,
+	(quantity * cost_to_customer_per_qty) as 'Total Amt per Transaction'
+from 
+	customer_purchases;
+ 
+-------------------------------------------------------------------------
+ROUND UP THE TOTAL AMOUNT PER TRANSACTION 
+
+select 
+	market_date,
+	customer_id,
+	quantity,
+	cost_to_customer_per_qty,
+	ROUND((quantity * cost_to_customer_per_qty),2) as 'Total Amt per Transaction'
+from 
+	customer_purchases;
+ 
+********************************************************************************************
+SELECT ROUND(5600,-3); -- 6000
+SELECT ROUND(5600,-2);  -- 5600
+SELECT ROUND(5400,-3);  -- 5000
+SELECT ROUND(5400,-4);  -- 10000
+SELECT ROUND(4400,-4);  -- 0
+SELECT CEIL(12.5); -- 13
+SELECT fLOOR(12.5); -- 12
+  
+********************************************************************************************
+
+
+Q : FIRST NAME AND LAST NAME WITH A SPACE 
+
+ SELECT
+	customer_first_name,
+   customer_last_name,
+   concat(customer_first_name ," ", customer_last_name) as full_name
+from
+	customer;
+-------------------------------- full name in upper case 
+SELECT
+	customer_first_name,
+    customer_last_name,
+    UPPER(concat(customer_first_name ," ", customer_last_name)) as full_name
+from
+	customer;
+--------------------------------- first name as it is , last name in upper case 
+SELECT
+	customer_first_name,
+    customer_last_name,
+    concat(customer_first_name ," ", UPPER(customer_last_name)) as full_name
+from
+	customer;
+   
+   
+   
+********************************************************************************************
+
+Q : EXTRACT ALL THE PRODUCT NAMES THAT ARE PART OF PRODUCT_CATEGOTY 1 :
+
+SELECT
+	product_id,
+	product_category_id,
+	product_name
+FROM 
+	product
+WHERE 
+	product_category_id = 1;
+   
+********************************************************************************************
+
+Q :   PRINT A REPORT OF EVERTHING CUSTOMER_UD 4 HAS EVER PURCHASED AT FARMER'S MARKET.
+SORT BY MARKET DATA , VENDOR_ID AND PRODUCT_ID
+    
+    
+SELECT 
+	*,
+   ROUND((quantity * cost_to_customer_per_qty),2) as Total_Amount
+FROM 
+	customer_purchases
+WHERE 
+	customer_id = 4
+ORDER BY 
+	market_date,
+   vendor_id,
+   product_id;
+    
+  
+********************************************************************************************
+Q : GET ALL PRODUCT INFO , WITH ID BETWEEN 3 AND 8 , AND ALSO 10 .
+
+
+SELECT
+	*
+FROM 
+	product
+WHERE
+	(product_id > 3 and product_id < 8) OR (product_id = 10);      -- not included 3 and 8 
+    
+SELECT
+*
+FROM 
+	product
+WHERE
+	(product_id between  3 and 8) OR (product_id = 10);       -- includes 3 and 8 both 
+   
+   
+********************************************************************************************
+   
+select 
+customer_id,
+customer_first_name,
+customer_last_name
+from 
+customer
+where LOWER(customer_first_name) = "carloz" or 
+	LOWER(customer_last_name) = "diaz";
+   
+ 
+********************************************************************************************
+
+Q  : FIND BOOTH ASSIGMENTS FOR VENDOR 7 FOR ANY MARKET DATE BETWEEN ARPIL 3 2019 AND MAY 16 2019
+INCLUDE BOTH DATES . 
+
+
+SELECT 
+   * 
+FROM
+	vendor_booth_assignments
+WHERE
+   (vendor_id = 7) AND (market_date BETWEEN '2019-04-03' AND '2019-05-16')
+;
+   
+***********************************************************************************************
+Q : RETURN A LIST OF CUSTOMERS WITH SELECTED LAST NAMES : [Diaz, Edwards and Wilson]
+
+    
+SELECT
+   customer_first_name,
+   customer_last_name,
+   customer_id
+FROM
+   customer
+WHERE 
+   customer_last_name in ('Diaz', 'Edwards','Wilson');
+
+***********************************************************************************************
+
+Q : WANT TO GET THE DATA ABOUT A CUSTOMER YOU KNEW AS 'JERRY' 
+   BUT NOT SURE HE WAS LISTED IN DATABASE AS JERRY OR JEREMY OR JEREMIAH.
+   
+SELECT
+   *
+FROM
+   customer
+WHERE 
+   customer_first_name like "Jer%";
+    
+***********************************************************************************************
+
+Q :  FIND ALL THE PRODUCTS WHICH HAVE NO SIZE RECORDED AGAINST THEM . 
+
+SELECT 
+   * 
+FROM 
+   product
+WHERE product_size is null;
+------------
+SELECT 
+   * 
+FROM 
+   product
+WHERE (product_size is null) OR (product_size = "");
+  -- full prof condition for missing value 
+
+***********************************************************************************************
+Q : ANALYZE PURCHASES MADE AT THE FARMERS MARKET ON DAYS WHEN IT RAINED. 
+
+
+SELECT 
+    market_date,
+    customer_id,
+    quantity,
+    cost_to_customer_per_qty,
+    ROUND((quantity * cost_to_customer_per_qty),2) AS 'Total Amt per Transaction'
+FROM
+	customer_purchases
+WHERE 
+   market_date IN (
+                  SELECT 
+                     DISTINCT(market_date)
+                  FROM 
+                     market_date_info
+                  WHERE 
+                     market_rain_flag = 1
+                      )
+ ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***********************************************************************************************
+***********************************************************************************************
+
+EXECUTION ORDER IN SQL : 
+
+FROM
+WHERE
+GROUP BY
+AGGREGATES
+HAVING 
+WINDOW FUNCTIONS
+SELECT
+DISTINCT
+UNION/INTERSECT/EXCEPT
+ORDER BY
+OFFSET
+LIMIT/FETCH/TOP
+
+
+***********************************************************************************************
+***********************************************************************************************
